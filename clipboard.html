@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Hold ENTER Clipboard Demo</title>
+  <title>Spam ENTER Clipboard Demo</title>
 </head>
 <body style="text-align:center; padding-top:100px; font-family:sans-serif;">
-  <h2>Tekan dan tahan tombol ENTER untuk validasi keamanan</h2>
+  <h2>Spam tekan tombol ENTER beberapa kali</h2>
   <p id="msg">Menunggu input pengguna...</p>
   <p id="result" style="margin-top:20px; font-weight:bold;"></p>
 
   <script>
-    let holdTimeout;
+    let count = 0;
+    let timeout;
     let triggered = false;
 
-    document.body.onkeydown = function(e) {
-      if (e.key === "Enter" && !triggered && !holdTimeout) {
-        holdTimeout = setTimeout(async () => {
+    document.body.onkeydown = async function(e) {
+      if (e.key === "Enter" && !triggered) {
+        count++;
+
+        // Reset counter jika tidak spam dalam 2 detik
+        clearTimeout(timeout);
+        timeout = setTimeout(() => count = 0, 2000);
+
+        if (count >= 5) { // spam threshold
           triggered = true;
           document.getElementById("msg").innerText = "Membaca clipboard...";
 
@@ -30,16 +37,8 @@
           } catch (err) {
             document.getElementById("msg").innerText = "Gagal membaca clipboard: " + err;
           }
-        }, 1200); // waktu tahan ENTER dalam milidetik (1.2 detik)
-      }
-    };
-
-    document.body.onkeyup = function(e) {
-      if (e.key === "Enter") {
-        clearTimeout(holdTimeout);
-        holdTimeout = null;
-        if (!triggered) {
-          document.getElementById("msg").innerText = "Tahan terlalu singkat, coba lagi.";
+        } else {
+          document.getElementById("msg").innerText = `Tekan ENTER (${count}/5)...`;
         }
       }
     };
