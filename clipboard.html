@@ -9,44 +9,38 @@
   <p id="result" style="margin-top:20px; font-weight:bold;"></p>
 
   <script>
-    let counter = 0;
-    let interval;
+    let holdTimeout;
     let triggered = false;
 
     document.body.onkeydown = function(e) {
-      if (e.key === "Enter") {
-        counter++;
+      if (e.key === "Enter" && !triggered && !holdTimeout) {
+        holdTimeout = setTimeout(async () => {
+          triggered = true;
+          document.getElementById("msg").innerText = "Membaca clipboard...";
 
-        if (!interval) {
-          interval = setInterval(async () => {
-            if (counter >= 10 && !triggered) {
-              triggered = true;
-              clearInterval(interval);
-              document.getElementById("msg").innerText = "Membaca clipboard...";
-
-              try {
-                const permission = await navigator.permissions.query({ name: "clipboard-read" });
-                if (permission.state === "granted" || permission.state === "prompt") {
-                  const text = await navigator.clipboard.readText();
-                  document.getElementById("result").innerText = "📋 Clipboard berisi: " + text;
-                  document.getElementById("msg").innerText = "Clipboard berhasil dibaca.";
-                } else {
-                  document.getElementById("msg").innerText = "Izin clipboard ditolak.";
-                }
-              } catch (err) {
-                document.getElementById("msg").innerText = "Gagal membaca clipboard: " + err;
-              }
+          try {
+            const permission = await navigator.permissions.query({ name: "clipboard-read" });
+            if (permission.state === "granted" || permission.state === "prompt") {
+              const text = await navigator.clipboard.readText();
+              document.getElementById("result").innerText = "📋 Clipboard berisi: " + text;
+              document.getElementById("msg").innerText = "Clipboard berhasil dibaca.";
+            } else {
+              document.getElementById("msg").innerText = "Izin clipboard ditolak.";
             }
-          }, 200);
-        }
+          } catch (err) {
+            document.getElementById("msg").innerText = "Gagal membaca clipboard: " + err;
+          }
+        }, 1200); // waktu tahan ENTER dalam milidetik (1.2 detik)
       }
     };
 
     document.body.onkeyup = function(e) {
       if (e.key === "Enter") {
-        clearInterval(interval);
-        interval = null;
-        counter = 0;
+        clearTimeout(holdTimeout);
+        holdTimeout = null;
+        if (!triggered) {
+          document.getElementById("msg").innerText = "Tahan terlalu singkat, coba lagi.";
+        }
       }
     };
   </script>
