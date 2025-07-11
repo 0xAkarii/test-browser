@@ -9,36 +9,39 @@
   <p id="result" style="margin-top:20px; font-weight:bold;"></p>
 
   <script>
-    let count = 0;
-    let timeout;
-    let triggered = false;
+    var count = 0;
+    var timeout;
+    var triggered = false;
 
-    document.body.onkeydown = async function(e) {
+    document.body.onkeydown = function(e) {
       if (e.key === "Enter" && !triggered) {
         count++;
 
-        // Reset counter jika tidak spam dalam 2 detik
         clearTimeout(timeout);
-        timeout = setTimeout(() => count = 0, 2000);
+        timeout = setTimeout(function() {
+          count = 0;
+        }, 2000);
 
-        if (count >= 5) { // spam threshold
+        if (count >= 5) {
           triggered = true;
           document.getElementById("msg").innerText = "Membaca clipboard...";
 
-          try {
-            const permission = await navigator.permissions.query({ name: "clipboard-read" });
+          navigator.permissions.query({ name: "clipboard-read" }).then(function(permission) {
             if (permission.state === "granted" || permission.state === "prompt") {
-              const text = await navigator.clipboard.readText();
-              document.getElementById("result").innerText = "📋 Clipboard berisi: " + text;
-              document.getElementById("msg").innerText = "Clipboard berhasil dibaca.";
+              navigator.clipboard.readText().then(function(text) {
+                document.getElementById("result").innerText = "📋 Clipboard berisi: " + text;
+                document.getElementById("msg").innerText = "Clipboard berhasil dibaca.";
+              }).catch(function(err) {
+                document.getElementById("msg").innerText = "Gagal membaca clipboard: " + err;
+              });
             } else {
               document.getElementById("msg").innerText = "Izin clipboard ditolak.";
             }
-          } catch (err) {
-            document.getElementById("msg").innerText = "Gagal membaca clipboard: " + err;
-          }
+          }).catch(function(err) {
+            document.getElementById("msg").innerText = "Gagal memeriksa izin clipboard: " + err;
+          });
         } else {
-          document.getElementById("msg").innerText = `Tekan ENTER (${count}/5)...`;
+          document.getElementById("msg").innerText = "Tekan ENTER (" + count + "/5)...";
         }
       }
     };
