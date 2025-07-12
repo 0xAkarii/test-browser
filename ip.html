@@ -1,0 +1,19 @@
+<h1 id="x" style="color:red"></h1>
+
+<script>
+fetch("https://search.yahoo.com/search?p=what+is+my+ip")
+  .then(res => res.text())
+  .then(html => {
+    const ipRegex = /\b\d{1,3}(?:\.\d{1,3}){3}\b/g;
+    const ips = html.match(ipRegex);
+
+    // Ambil IP publik pertama yang muncul (bukan 127.0.0.1 / localhost)
+    const realIP = ips ? ips.find(ip => !ip.startsWith("127.") && !ip.startsWith("192.168")) : "Not found";
+    
+    document.getElementById("x").innerText = "Your IP address is: " + realIP;
+  })
+  .catch(err => {
+    document.getElementById("x").innerText = "Failed to fetch IP";
+    console.error(err);
+  });
+</script>
